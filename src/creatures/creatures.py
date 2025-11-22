@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import random
-import config
+from src import config as config
 
 @dataclass
 class Creature:

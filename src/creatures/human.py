@@ -1,5 +1,5 @@
-from creatures import Creature
-import config
+from src.creatures.creatures import Creature
+import src.config as config
 from dataclasses import dataclass
 
 @dataclass
@@ -14,18 +14,18 @@ class Human(Creature):
     actions_left: int = config.MAX_ACTIONS_PER_DAY
     color: str = 'black'
     
-    def movement(self, action_id, world):
+    def movement(self, action_id, world, creatures_list):
         if not self.alive or self.actions_left <= 0:
             return
         
         if action_id == config.ACTION_MOVE_UP:
-            self.move(-1, 0, world.size)
-        elif action_id == config.ACTION_MOVE_DOWN:
-            self.move(1, 0, world.size)
-        elif action_id == config.ACTION_MOVE_LEFT:
             self.move(0, -1, world.size)
-        elif action_id == config.ACTION_MOVE_RIGHT:
+        elif action_id == config.ACTION_MOVE_DOWN:
             self.move(0, 1, world.size)
+        elif action_id == config.ACTION_MOVE_LEFT:
+            self.move(-1, 0, world.size)
+        elif action_id == config.ACTION_MOVE_RIGHT:
+            self.move(1, 0, world.size)
         elif action_id == config.ACTION_STAY:
             self.energy = min(self.energy + 2, 100)
         elif action_id == config.ACTION_INTERACT:
@@ -37,7 +37,7 @@ class Human(Creature):
 
     def interact_with_environment(self, world):
         x, y = self.x, self.y
-        tile = world.terrain_grid[x, y]
+        tile = world.terrain_grid[y, x]
 
         if tile == config.ID_FOREST:
             gained = world.chop_tree(x, y)
@@ -60,8 +60,8 @@ class Human(Creature):
             return
             
         x, y = self.x, self.y
-        tile_id = world.terrain_grid[x, y]
-        fuel_amount = world.wood_grid[x, y]
+        tile_id = world.terrain_grid[y, x]
+        fuel_amount = world.wood_grid[y, x]
 
         is_active_campfire = (tile_id == config.ID_CAMPFIRE and fuel_amount > 0)
 

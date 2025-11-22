@@ -1,5 +1,5 @@
-from creatures import Creature
-import config
+from src.creatures.creatures import Creature
+import src.config as config
 from dataclasses import dataclass
 import random
 

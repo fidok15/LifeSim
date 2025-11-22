@@ -1,6 +1,6 @@
 # Flyweight approach
 from dataclasses import dataclass
-from . import config
+from src import config as config
 
 @dataclass(frozen=True)
 class TerrainType:

@@ -1,6 +1,6 @@
 import numpy as np
-from . import config
-from . import terrain
+from src import config as config
+from src import terrain
 #zmienne dynamiczne
 class World:
     def __init__(self):
@@ -24,23 +24,23 @@ class World:
 
 
     def chop_tree(self, x, y):
-        if self.terrain_grid[x, y] != config.ID_FOREST:
+        if self.terrain_grid[y, x] != config.ID_FOREST:
             return 0 
         
-        if self.wood_grid[x, y] <= 0:
+        if self.wood_grid[y, x] <= 0:
             return 0
 
-        self.wood_grid[x, y] -= 1
+        self.wood_grid[y, x] -= 1
         return 1
     
     def add_fuel(self, x, y):
-        if self.terrain_grid[x, y] != config.ID_CAMPFIRE:
+        if self.terrain_grid[y, x] != config.ID_CAMPFIRE:
             return 0
         
-        if self.wood_grid[x, y] >= 5:
+        if self.wood_grid[y, x] >= 5:
             return 0
 
-        self.wood_grid[x,y] += 1
+        self.wood_grid[y, x] += 1
         return 1
     
     def update_world_tick(self):
@@ -49,8 +49,8 @@ class World:
         self.wood_grid = np.maximum(self.wood_grid, 0)
 
     def move_creature(self, creature, new_x, new_y):
-        self.world.entity_grid[creature.x, creature.y] = None
+        self.world.entity_grid[creature.y, creature.x] = None
         creature.x = new_x
         creature.y = new_y
     
-        self.world.entity_grid[new_x, new_y] = creature
+        self.world.entity_grid[new_y, new_x] = creature

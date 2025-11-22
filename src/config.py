@@ -1,5 +1,5 @@
 #World
-MAP_SIZE = 65
+MAP_SIZE = 10
 # % of terrain
 FOREST_AMOUNT = 0.25
 CAMPFIRE_AMOUNT = 0.25
@@ -25,8 +25,8 @@ TEMP_DOWN = 0.05
 MAX_WOOD_INV = 5
 
 #num of creature 
-NUM_SHEEPS = 4
-NUM_WOLFS = 3
+NUM_SHEEP = 4
+NUM_WOLVES = 3
 # BABY = 1 TODO OR NOT
 #base energy
 HUMAN_START_ENERGY = 100
