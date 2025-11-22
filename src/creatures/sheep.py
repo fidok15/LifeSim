@@ -9,7 +9,7 @@ class Sheep(Creature):
     alive: bool = True
     color: str = 'white'
     
-    def step_auto(self, world):
+    def sheep_move(self, world):
         if not self.alive: return
         dx = random.randint(-1, 1)
         dy = random.randint(-1, 1)

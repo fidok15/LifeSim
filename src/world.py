@@ -6,8 +6,7 @@ class World:
     def __init__(self):
         self.size = config.MAP_SIZE
         self.terrain_grid = np.zeros((self.size, self.size), dtype=int)
-        self.tree_amount_grid = np.zeros((self.size, self.size), dtype=float)
-        self.campfire_fuel_grid = np.zeros((self.size, self.size), dtype=float)
+        self.wood_grid = np.zeros((self.size, self.size), dtype=float)
         self.generate_world()
 
     def generate_world(self):
@@ -20,16 +19,30 @@ class World:
                 terrain_id = self.terrain_grid[x, y]
 
                 if terrain_id == config.ID_FOREST:
-                    self.tree_amount_grid[x, y] = np.random.randint(3, 10)
-                elif terrain_id == config.ID_CAMPFIRE:
-                    self.campfire_fuel_grid[x, y] = np.random.uniform(1.0, 3.0)
+                    self.wood_grid[x, y] = np.random.randint(3, 10)
+
 
     def chop_tree(self, x, y):
         if self.terrain_grid[x, y] != config.ID_FOREST:
             return 0 
         
-        if self.tree_amount_grid[x, y] <= 0:
+        if self.wood_grid[x, y] <= 0:
             return 0
 
-        self.tree_amount_grid[x, y] -= 1
+        self.wood_grid[x, y] -= 1
         return 1
+    
+    def add_fueal(self, x, y):
+        if self.terrain_grid[x, y] != config.ID_CAMPFIRE:
+            return 0
+        
+        if self.wood_grid[x, y] == 5:
+            return 0
+
+        self.wood_grid[x,y] = min(self.wood_grid[x,y] + 1, 5)
+        return -1
+    
+    def update_world_tick(self):
+        active_fires_mask = (self.terrain_grid == config.ID_CAMPFIRE) & (self.wood_grid > 0)
+        self.wood_grid[active_fires_mask] -= 0.1
+        self.wood_grid = np.maximum(self.wood_grid, 0)

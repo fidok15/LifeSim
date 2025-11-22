@@ -40,13 +40,14 @@ class Human(Creature):
 
         if tile == config.ID_FOREST:
             gained = world.chop_tree(x, y)
-            if gained > 0 and self.wood_inv < config.MAX_WOOD_INV:
+            # TODO do poprawy
+            if gained > 0 and self.wood_inv + gained < config.MAX_WOOD_INV:
                 self.wood_inv += gained
                 self.wood_inv = min(self.wood_inv, config.MAX_WOOD_INV)
 
         elif tile == config.ID_CAMPFIRE:
             if self.wood_inv > 0:
-                world.campfire_fuel_grid[x, y] += 1
+                world.wood_grid[x, y] += 1
                 self.wood_inv -= 1
 
         elif tile == config.ID_WATER:
@@ -58,14 +59,13 @@ class Human(Creature):
             
         x, y = self.x, self.y
         tile_id = world.terrain_grid[x, y]
-        fuel_amount = world.campfire_fuel_grid[x, y]
+        fuel_amount = world.wood_grid[x, y]
 
         is_active_campfire = (tile_id == config.ID_CAMPFIRE and fuel_amount > 0)
 
         if is_active_campfire:
             self.energy += 5
-            self.temp += 1
-            world.campfire_fuel_grid[x, y] = max(0, fuel_amount - 0.1) 
+            self.temp += 0.5
         else:
             self.temp -= config.TEMP_DOWN
 
@@ -78,5 +78,10 @@ class Human(Creature):
             self.alive = False
             return
         
+    # def colision(self, world, creature_list):
+
+    def new_day(self):
+        self.actions_left = config.MAX_ACTIONS_PER_DAY
+
 
 

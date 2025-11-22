@@ -9,8 +9,8 @@ class Wolf(Creature):
     alive: bool = True
     color: str = 'red'
 
-    def movement_random(self, word):
+    def wolf_move(self, world):
         if not self.alive: return
         dx = random.randint(-1, 1)
         dy = random.randint(-1, 1)
-        self.move(dx, dy, word.size)
+        self.move(dx, dy, world.size)

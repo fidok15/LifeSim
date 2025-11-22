@@ -1,5 +1,4 @@
-# Flyweight approach no podejście 
-
+# Flyweight approach
 from dataclasses import dataclass
 from . import config
 
@@ -8,25 +7,24 @@ class TerrainType:
     id: int
     name: str
     color: str
-    field_temp: float
 
 
 #zmienne statyczne
 class TerrainRegistry:
     PLAIN = TerrainType(
-        id=config.ID_PLAIN, name="równina", color='lightgreen', field_temp= -0.5
+        id=config.ID_PLAIN, name="równina", color='lightgreen'
     )
     
     FOREST = TerrainType(
-        id=config.ID_FOREST, name="las", color='darkgreen', field_temp= -0.5
+        id=config.ID_FOREST, name="las", color='darkgreen'
     )
     
     WATER = TerrainType(
-        id=config.ID_WATER, name="woda", color='blue', field_temp= -0.5
+        id=config.ID_WATER, name="woda", color='blue'
     )
     
     CAMPFIRE = TerrainType(
-        id=config.ID_CAMPFIRE, name="ognisko", color='orange', field_temp= -0.5
+        id=config.ID_CAMPFIRE, name="ognisko", color='orange'
     )
 
     _registry = {
