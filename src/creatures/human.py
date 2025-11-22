@@ -47,8 +47,9 @@ class Human(Creature):
 
         elif tile == config.ID_CAMPFIRE:
             if self.wood_inv > 0:
-                world.wood_grid[x, y] += 1
-                self.wood_inv -= 1
+                success = world.add_fuel(x, y)
+                if success == 1:
+                    self.wood_inv -= 1                  
 
         elif tile == config.ID_WATER:
             self.thirsty = min(self.thirsty + 10, 20)

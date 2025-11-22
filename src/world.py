@@ -32,15 +32,15 @@ class World:
         self.wood_grid[x, y] -= 1
         return 1
     
-    def add_fueal(self, x, y):
+    def add_fuel(self, x, y):
         if self.terrain_grid[x, y] != config.ID_CAMPFIRE:
             return 0
         
-        if self.wood_grid[x, y] == 5:
+        if self.wood_grid[x, y] >= 5:
             return 0
 
-        self.wood_grid[x,y] = min(self.wood_grid[x,y] + 1, 5)
-        return -1
+        self.wood_grid[x,y] += 1
+        return 1
     
     def update_world_tick(self):
         active_fires_mask = (self.terrain_grid == config.ID_CAMPFIRE) & (self.wood_grid > 0)
