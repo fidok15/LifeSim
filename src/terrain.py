@@ -14,19 +14,19 @@ class TerrainType:
 #zmienne statyczne
 class TerrainRegistry:
     PLAIN = TerrainType(
-        id=config.ID_PLAIN, name="równina", color='lightgreen'
+        id=config.ID_PLAIN, name="równina", color='lightgreen', field_temp= -0.5
     )
     
     FOREST = TerrainType(
-        id=config.ID_FOREST, name="las", color='darkgreen'
+        id=config.ID_FOREST, name="las", color='darkgreen', field_temp= -0.5
     )
     
     WATER = TerrainType(
-        id=config.ID_WATER, name="woda", color='blue'
+        id=config.ID_WATER, name="woda", color='blue', field_temp= -0.5
     )
     
     CAMPFIRE = TerrainType(
-        id=config.ID_CAMPFIRE, name="ognisko", color='orange'
+        id=config.ID_CAMPFIRE, name="ognisko", color='orange', field_temp= -0.5
     )
 
     _registry = {

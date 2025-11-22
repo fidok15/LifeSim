@@ -17,19 +17,19 @@ class World:
 
         for y in range(self.size):
             for x in range(self.size):
-                terrain_id = self.terrain_grid[y, x]
+                terrain_id = self.terrain_grid[x, y]
 
                 if terrain_id == config.ID_FOREST:
-                    self.tree_amount_grid[y, x] = np.random.randint(3, 10)
+                    self.tree_amount_grid[x, y] = np.random.randint(3, 10)
                 elif terrain_id == config.ID_CAMPFIRE:
-                    self.campfire_fuel_grid[y, x] = np.random.uniform(1.0, 3.0)
+                    self.campfire_fuel_grid[x, y] = np.random.uniform(1.0, 3.0)
 
     def chop_tree(self, x, y):
-        if self.terrain_grid[y, x] != config.ID_FOREST:
+        if self.terrain_grid[x, y] != config.ID_FOREST:
             return 0 
         
-        if self.tree_amount_grid[y, x] <= 0:
+        if self.tree_amount_grid[x, y] <= 0:
             return 0
 
-        self.tree_amount_grid[y, x] -= 1
+        self.tree_amount_grid[x, y] -= 1
         return 1
