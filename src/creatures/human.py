@@ -8,11 +8,12 @@ class Human(Creature):
     thirsty: float = 20.0
     temp: float = 36.6
     energy: float = 100
-    age: int = 0
+    days_alive: int = 0
     wood_inv: int = 0
     alive: bool = True
     actions_left: int = config.MAX_ACTIONS_PER_DAY
-
+    color: str = 'black'
+    
     def movement(self, action_id, world):
         if not self.alive or self.actions_left <= 0:
             return

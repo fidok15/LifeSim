@@ -7,6 +7,7 @@ class World:
         self.size = config.MAP_SIZE
         self.terrain_grid = np.zeros((self.size, self.size), dtype=int)
         self.wood_grid = np.zeros((self.size, self.size), dtype=float)
+        self.entity_grid = np.full((self.size, self.size), None, dtype=object)
         self.generate_world()
 
     def generate_world(self):
@@ -43,6 +44,13 @@ class World:
         return 1
     
     def update_world_tick(self):
-        active_fires_mask = (self.terrain_grid == config.ID_CAMPFIRE) & (self.wood_grid > 0)
-        self.wood_grid[active_fires_mask] -= 0.1
+        fires_mask = (self.terrain_grid == config.ID_CAMPFIRE) & (self.wood_grid > 0)
+        self.wood_grid[fires_mask] -= 0.1
         self.wood_grid = np.maximum(self.wood_grid, 0)
+
+    def move_creature(self, creature, new_x, new_y):
+        self.world.entity_grid[creature.x, creature.y] = None
+        creature.x = new_x
+        creature.y = new_y
+    
+        self.world.entity_grid[new_x, new_y] = creature

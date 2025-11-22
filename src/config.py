@@ -1,17 +1,18 @@
 #World
 MAP_SIZE = 65
+# % of terrain
 FOREST_AMOUNT = 0.25
 CAMPFIRE_AMOUNT = 0.25
 WATER_AMOUNT = 0.25
 PLAIN_AMOUNT = 0.25
 
-#Terrain ID
+#terrain ID
 ID_FOREST = 0
 ID_CAMPFIRE = 1
 ID_WATER = 2
 ID_PLAIN = 3
 
-#Respawn
+#respawn
 WOOD_REGEN = 3
 WOLF_REGEN = 3
 SHEEP_REGEN = 3
@@ -23,7 +24,11 @@ THIRSTY = 1
 TEMP_DOWN = 0.05
 MAX_WOOD_INV = 5
 
-# BABY = 1
+#num of creature 
+NUM_SHEEPS = 4
+NUM_WOLFS = 3
+# BABY = 1 TODO OR NOT
+#base energy
 HUMAN_START_ENERGY = 100
 #wolf
 WOLF_START_ENERGY = 20
