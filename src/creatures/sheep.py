@@ -7,7 +7,6 @@ import random
 class Sheep(Creature):
     energy: float = config.SHEEP_START_ENERGY
     alive: bool = True
-    color: str = 'white'
     
     def sheep_move(self, world):
         if not self.alive: return

@@ -12,7 +12,6 @@ class Human(Creature):
     wood_inv: int = 0
     alive: bool = True
     actions_left: int = config.MAX_ACTIONS_PER_DAY
-    color: str = 'black'
     
     def movement(self, action_id, world, creatures_list):
         if not self.alive or self.actions_left <= 0:
@@ -27,22 +26,23 @@ class Human(Creature):
         elif action_id == config.ACTION_MOVE_RIGHT:
             self.move(1, 0, world.size)
         elif action_id == config.ACTION_STAY:
-            self.energy = min(self.energy + 2, 100)
+            self.energy = min(self.energy + 4, 100)
         elif action_id == config.ACTION_INTERACT:
-            self.interact_with_environment(world)
-
+            self.interact_with_environment(world, creatures_list)
+            
+        self.colision(world, creatures_list)
         self.update_stats(world)
         self.actions_left -= 1
         
 
-    def interact_with_environment(self, world):
+    def interact_with_environment(self, world, creatures_list):
         x, y = self.x, self.y
         tile = world.terrain_grid[y, x]
 
         if tile == config.ID_FOREST:
             gained = world.chop_tree(x, y)
             # TODO do poprawy
-            if gained > 0 and self.wood_inv + gained < config.MAX_WOOD_INV:
+            if gained > 0 and self.wood_inv + gained <= config.MAX_WOOD_INV:
                 self.wood_inv += gained
                 self.wood_inv = min(self.wood_inv, config.MAX_WOOD_INV)
 
@@ -54,6 +54,16 @@ class Human(Creature):
 
         elif tile == config.ID_WATER:
             self.thirsty = min(self.thirsty + 10, 20)
+            
+        for creature in creatures_list:
+            if creature is self or not creature.alive:
+                continue
+            
+            if creature.x == x and creature.y == y and type(creature).__name__ == 'Sheep':
+                creature.alive = False
+                self.hunger += 10
+                self.energy -= 2
+                break
 
     def update_stats(self, world):
         if not self.alive:
@@ -66,7 +76,7 @@ class Human(Creature):
         is_active_campfire = (tile_id == config.ID_CAMPFIRE and fuel_amount > 0)
 
         if is_active_campfire:
-            self.energy += 5
+            self.energy += 10
             self.temp += 0.5
         else:
             self.temp -= config.TEMP_DOWN
@@ -75,13 +85,30 @@ class Human(Creature):
         self.temp = min(self.temp, 37.0)
         self.thirsty -= 0.1
         self.thirsty = min(self.thirsty, 20.0)
-
+        self.energy -= 1
+        self.energy = max(0, min(self.energy, 100))
+        self.hunger -= 1
+        self.hunger = max(0, min(self.energy, 20))        
         if self.temp <= 34.0 or self.thirsty <= 0.01:
             self.alive = False
             return
         
-    # def colision(self, world, creature_list):
-
+    def colision(self, world, creature_list):
+        for creature in creature_list:
+            if creature is self or not creature.alive:
+                continue
+            
+            if creature.x == self.x and creature.y == self.y:
+                if type(creature).__name__ == 'Wolf':
+                    if self.energy > creature.energy:
+                        creature.alive = False
+                        self.energy -= 5
+                        self.hunger += 20
+                    else:
+                        self.alive = False
+                        return
+                    
+                    
     def new_day(self):
         self.actions_left = config.MAX_ACTIONS_PER_DAY
 

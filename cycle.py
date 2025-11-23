@@ -15,21 +15,21 @@ class Cycle:
 
     def spawn_creature(self):
         x, y = self.valid_spawn()
-        self.human = Human(id = 999, x=x, y=y, color='black')
+        self.human = Human(id = 999, x=x, y=y)
         self.creatures.append(self.human)
         self.world.entity_grid[y, x] = self.human
 
         #spawn owiec 
         for i in range(config.NUM_SHEEP):
             x, y = self.valid_spawn()
-            sheep = Sheep(id=i, x=x, y=y, color='white')
+            sheep = Sheep(id=i, x=x, y=y)
             self.creatures.append(sheep)
             self.world.entity_grid[y, x] = sheep
             
         # Spawn wilków
         for i in range(config.NUM_WOLVES):
             x, y = self.valid_spawn()
-            wolf = Wolf(id=100+i, x=x, y=y, color='red')
+            wolf = Wolf(id=100+i, x=x, y=y)
             self.creatures.append(wolf)
             self.world.entity_grid[y, x] = wolf
 
@@ -125,7 +125,7 @@ def print_map(sim):
             line += char
         print(line)
     print("-" * (sim.world.size + 2))
-    print("STEROWANIE: [W,A,S,D] - Ruch, [E] - Interakcja (Picie/Rąbanie/Palenie), [Q] - Wyjście")
+    print("STEROWANIE: [W,A,S,D] - Ruch, [F] - stój w miejscu, [E] - Interakcja (Picie/Rąbanie/Palenie), [Q] - Wyjście")
 
 # --- GŁÓWNY PROGRAM ---
 
@@ -148,6 +148,7 @@ if __name__ == "__main__":
             elif key == 'A': action = config.ACTION_MOVE_LEFT
             elif key == 'D': action = config.ACTION_MOVE_RIGHT
             elif key == 'E': action = config.ACTION_INTERACT
+            elif key == 'F': action = config.ACTION_STAY
             elif key == 'Q': 
                 print("Koniec gry.")
                 break

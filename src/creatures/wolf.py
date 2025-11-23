@@ -7,7 +7,6 @@ import random
 class Wolf(Creature):
     energy: float = config.WOLF_START_ENERGY
     alive: bool = True
-    color: str = 'red'
 
     def wolf_move(self, world):
         if not self.alive: return

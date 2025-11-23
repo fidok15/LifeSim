@@ -7,7 +7,6 @@ class Creature:
     id: int
     x: int
     y: int
-    color: str = 'white'
 
     def move(self, dx, dy, world_size):
         new_x = max(0, min(self.x + dx, world_size - 1))
