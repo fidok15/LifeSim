@@ -86,7 +86,7 @@ def print_map(sim):
     
     h = sim.human
     print(f"Dzień: {h.days_alive} | Akcje: {h.actions_left}/{config.MAX_ACTIONS_PER_DAY}")
-    print(f"Zdrowie (Alive): {h.alive} | Energia: {h.energy:.1f} | Głód: {h.hunger} | Pragnienie: {h.thirsty:.1f}")
+    print(f"Zdrowie (Alive): {h.alive} | Energia: {h.energy:.1f} | Głód: {h.hunger:.1f} | Pragnienie: {h.thirsty:.1f}")
     print(f"Temp: {h.temp:.1f}°C | Drewno: {h.wood_inv}")
     print("-" * (sim.world.size + 2))
 
