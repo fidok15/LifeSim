@@ -11,28 +11,40 @@ class Cycle:
         self.world = World()
         self.world.entity_grid = np.full((self.world.size, self.world.size), None, dtype=object)
         self.human = None
+        self.next_entity_id = 1        
         self.creatures = []
         self.spawn_creature()
 
+    def get_new_id(self):
+        id = self.next_entity_id
+        self.next_entity_id += 1
+        return id
+    
     def spawn_creature(self):
         x, y = self.valid_spawn()
-        self.human = Human(id = 999, x=x, y=y)
+        self.human = Human(id=self.get_new_id(), x=x, y=y)
         self.creatures.append(self.human)
         self.world.entity_grid[y, x] = self.human
 
         #spawn owiec 
-        for i in range(config.NUM_SHEEP):
+        for _ in range(config.NUM_SHEEP):
             x, y = self.valid_spawn()
-            sheep = Sheep(id=i, x=x, y=y)
+            sheep = Sheep(id=self.get_new_id(), x=x, y=y)
             self.creatures.append(sheep)
             self.world.entity_grid[y, x] = sheep
             
         # Spawn wilków
-        for i in range(config.NUM_WOLVES):
+        for _ in range(config.NUM_WOLVES):
             x, y = self.valid_spawn()
-            wolf = Wolf(id=100+i, x=x, y=y)
+            wolf = Wolf(id=self.get_new_id(), x=x, y=y)
             self.creatures.append(wolf)
             self.world.entity_grid[y, x] = wolf
+
+        for _ in range(config.NUM_KNIGHTS):
+            x, y = self.valid_spawn()
+            knight = Knight(id=self.get_new_id(), x=x, y=y)
+            self.creatures.append(knight)
+            self.world.entity_grid[y, x] = knight
 
     #sprawdzenie spnawnu, aby się nie waliły na sibię na raz 
     def valid_spawn(self):
