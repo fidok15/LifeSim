@@ -112,6 +112,15 @@ class Human(Creature):
                         self.alive = False
                         return
                     
+            if creature.x == self.x and creature.y == self.y:
+                if type(creature).__name__ == 'Knight':
+                    if self.energy > creature.energy:
+                        creature.alive = False
+                        self.energy += config.COMBAT_KNIGHT_ENERGY_GAIN
+                        self.hunger += config.COMBAT_KNIGHT_HUNGER_GAIN
+                    else:
+                        self.alive = False
+                        return        
                     
     def new_day(self):
         self.actions_left = config.MAX_ACTIONS_PER_DAY

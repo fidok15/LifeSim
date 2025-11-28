@@ -4,6 +4,7 @@ import numpy as np
 from src import config as config
 from src.creatures.wolf import Wolf
 from src.creatures.sheep import Sheep
+from src.creatures.knight import Knight
 import os
 class Cycle:
     def __init__(self):
@@ -108,6 +109,7 @@ def print_map(sim):
                 if isinstance(entity, Human): char = "🤠"
                 elif isinstance(entity, Wolf): char = "🐺"
                 elif isinstance(entity, Sheep): char = "🐑"
+                elif isinstance(entity, Knight): char = "🤺"
                 else: char = "?"
             else:
                 # 2. Jeśli pusto, rysuj teren
