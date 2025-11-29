@@ -1,4 +1,4 @@
-from src.creatures.creatures import Creature
+from src.world.creatures.creatures import Creature
 import src.config as config
 from dataclasses import dataclass
 

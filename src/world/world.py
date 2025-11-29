@@ -1,6 +1,6 @@
 import numpy as np
 from src import config as config
-from src import terrain
+from src.world import terrain
 #zmienne dynamiczne
 class World:
     def __init__(self):

@@ -1,10 +1,10 @@
-from src.world import World
-from src.creatures.human import Human
+from src.world.world import World
+from src.world.creatures.human import Human
 import numpy as np
 from src import config as config
-from src.creatures.wolf import Wolf
-from src.creatures.sheep import Sheep
-from src.creatures.knight import Knight
+from src.world.creatures.wolf import Wolf
+from src.world.creatures.sheep import Sheep
+from src.world.creatures.knight import Knight
 import os
 class Cycle:
     def __init__(self):

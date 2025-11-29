@@ -1,11 +1,11 @@
-from src.creatures.creatures import Creature
+from src.world.creatures.creatures import Creature
 import src.config as config
 from dataclasses import dataclass
 import random
 
 @dataclass
-class Wolf(Creature):
-    energy: float = config.WOLF_START_ENERGY
+class Knight(Creature):
+    energy: float = config.KNIGHT_START_ENERGY
     alive: bool = True
 
     def wolf_move(self, world):
