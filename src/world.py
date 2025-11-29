@@ -17,10 +17,10 @@ class World:
 
         for y in range(self.size):
             for x in range(self.size):
-                terrain_id = self.terrain_grid[x, y]
+                terrain_id = self.terrain_grid[y, x]
 
                 if terrain_id == config.ID_FOREST:
-                    self.wood_grid[x, y] = np.random.randint(3, 10)
+                    self.wood_grid[y, x] = np.random.randint(config.WOOD_MIN_SPAWN, config.WOOD_MAX_SPAWN)
 
 
     def chop_tree(self, x, y):
