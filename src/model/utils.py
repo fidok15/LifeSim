@@ -42,6 +42,7 @@ class SurvivalEnv(gym.Env):
 
         if curent_h.hunger - prev_stats['hunger'] > 0 or curent_h.thirsty - prev_stats['thirsty'] > 0 or (curent_h.temp - prev_stats['temp'] > 0 and prev_stats['temp'] < (config.TEMP_DIE + config.TEMP_MAX) / 2 ):
             reward += 5
+            
         
         # if curent_h.hunger < 0.2 * config.HUNGER_MAX: reward -= 0.5
         # if curent_h.thirsty < 0.2 * config.THIRSTY_MAX: reward -= 0.5

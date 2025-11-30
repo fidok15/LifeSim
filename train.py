@@ -66,6 +66,7 @@ def nauka_ucznia():
 
     #co uczen mysli ze dostanie 
     uczen_predykcja = uczen((state_grid, state_stats)).gather(1, batch_action)
+    avg_q = uczen_predykcja.mean().item()
 
     with torch.no_grad():
         # co nauczyciel uwaza MAX wartość z nast stanu 
@@ -81,7 +82,7 @@ def nauka_ucznia():
     torch.nn.utils.clip_grad_value_(uczen.parameters(), 1)
     optimizer.step()
     
-    return loss.item()
+    return loss.item(), avg_q
 
 
 print("Rozgrzewanie bufora pamięci...")
@@ -100,7 +101,7 @@ for episode in range(config.EPISODEDS):
     obs, _ = env.reset()
     total_reward = 0
     episode_losses = []
-
+    episode_qs = []
     epsilon = config.EPS_END + (config.EPS_START - config.EPS_END) * math.exp(-1. * steps_done / config.EPS_DECAY)
 
     while True:
@@ -112,16 +113,19 @@ for episode in range(config.EPISODEDS):
         done = terminated or truncated
         #zapisanie do memory
         memory.push(obs, action, reward, next_obs, done)
-        loss_value = nauka_ucznia()
-        if loss_value is not None:
+        result = nauka_ucznia()
+        
+        if result is not None:
+            loss_value, q_val = result
             episode_losses.append(loss_value)
+            episode_qs.append(q_val)
         obs = next_obs
         total_reward += reward
 
         if done:
             # Obliczamy średni loss dla epizodu
             avg_loss = sum(episode_losses) / len(episode_losses) if episode_losses else 0
-            
+            avg_q_val = sum(episode_qs) / len(episode_qs)
             print(f"Epizod {episode+1}: Nagroda={total_reward:.2f}, Epsilon={epsilon:.2f}, Avg Loss={avg_loss:.4f}")
             
             # --- LOGOWANIE DO TENSORBOARD ---
@@ -129,9 +133,14 @@ for episode in range(config.EPISODEDS):
             writer.add_scalar('Training/Reward', total_reward, episode)
             writer.add_scalar('Training/Average_Loss', avg_loss, episode)
             writer.add_scalar('Training/Epsilon', epsilon, episode)
+            writer.add_scalar('Training/Average_Q_Value', avg_q_val, episode)
             # --------------------------------
             
             break
+
+    if episode % 50 == 0:
+        torch.save(uczen.state_dict(), f"checkpoint_{episode}.pth")
+        print(f"Zapisano model: checkpoint_{episode}.pth")
     #aktualizacja nauczyciela co jakis czas 
     if episode % config.TARGET_UPDATE == 0:
         nauczyciel.load_state_dict(uczen.state_dict())
