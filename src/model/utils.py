@@ -23,7 +23,7 @@ class SurvivalEnv(gym.Env):
     
     def step(self, action):
         prev_h = self.sim.human
-        prev_stats = {'hunger': prev_h.hunger, 'thirsty': prev_h.thirsty, 'temp': prev_h.temp}
+        prev_stats = {'hunger': prev_h.hunger, 'thirsty': prev_h.thirsty, 'temp': prev_h.temp, 'day_alive': prev_h.days_alive}
         self.sim.step(action)
 
         curent_h = self.sim.human
@@ -35,14 +35,17 @@ class SurvivalEnv(gym.Env):
         if terminated:
             return obs, -10.0, terminated, truncated, {}
         
-        reward += 0.05
+        reward += 0.1
+
+        # if curent_h.days_alive > prev_stats['day_alive']:
+        #     reward += 10 
+
+        if curent_h.hunger - prev_stats['hunger'] > 0 or curent_h.thirsty - prev_stats['thirsty'] > 0 or (curent_h.temp - prev_stats['temp'] > 0 and prev_stats['temp'] < (config.TEMP_DIE + config.TEMP_MAX) / 2 ):
+            reward += 5
         
-        if curent_h.hunger - prev_stats['hunger'] > 0 or curent_h.thirsty - prev_stats['thirsty'] > 0 or (curent_h.temp - prev_stats['temp'] > 0 and prev_stats['temp'] < (config.TEMP_MIN + config.TEMP_MAX) / 2 ):
-            reward += 0.5
-        
-        if curent_h.hunger < 0.2 * config.HUNGER_MAX: reward -= 0.1
-        if curent_h.thirsty < 0.2 * config.THIRSTY_MAX: reward -= 0.1
-        if curent_h.temp < config.TEMP_DIE + (0.2 * (config.TEMP_MAX - config.TEMP_DIE)) : reward -= 0.1
+        # if curent_h.hunger < 0.2 * config.HUNGER_MAX: reward -= 0.5
+        # if curent_h.thirsty < 0.2 * config.THIRSTY_MAX: reward -= 0.5
+        # if curent_h.temp < config.TEMP_DIE + (0.2 * (config.TEMP_MAX - config.TEMP_DIE)) : reward -= 0.5
 
         return obs, reward, terminated, truncated, {}
     
