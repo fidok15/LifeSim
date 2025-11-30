@@ -8,11 +8,12 @@ from src.model.utils import SurvivalEnv
 from src.model.model import DQNmodel
 from src.model.buffer import ReplayBuffer
 from src import config as config
-
+from torch.utils.tensorboard import SummaryWriter
 
 #naprawde istnieje takei cos jak mps 
 device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
 print(device)
+writer = SummaryWriter()
 env = SurvivalEnv()
 input_shape = env.observation_space[0].shape
 num_stats = env.observation_space[1].shape[0]
@@ -79,6 +80,8 @@ def nauka_ucznia():
     #zabezpieczenie przed czyms
     torch.nn.utils.clip_grad_value_(uczen.parameters(), 1)
     optimizer.step()
+    
+    return loss.item()
 
 
 print("Rozgrzewanie bufora pamięci...")
@@ -96,6 +99,8 @@ print("Bufor gotowy, zaczynamy trening!")
 for episode in range(config.EPISODEDS):
     obs, _ = env.reset()
     total_reward = 0
+    episode_losses = []
+
     epsilon = config.EPS_END + (config.EPS_START - config.EPS_END) * math.exp(-1. * steps_done / config.EPS_DECAY)
 
     while True:
@@ -107,12 +112,28 @@ for episode in range(config.EPISODEDS):
         done = terminated or truncated
         #zapisanie do memory
         memory.push(obs, action, reward, next_obs, done)
-        nauka_ucznia()
+        loss_value = nauka_ucznia()
+        if loss_value is not None:
+            episode_losses.append(loss_value)
         obs = next_obs
         total_reward += reward
+
         if done:
-            print(f"Epizod {episode+1}: Nagroda={total_reward:.2f}, Epsilon={epsilon:.2f}")
+            # Obliczamy średni loss dla epizodu
+            avg_loss = sum(episode_losses) / len(episode_losses) if episode_losses else 0
+            
+            print(f"Epizod {episode+1}: Nagroda={total_reward:.2f}, Epsilon={epsilon:.2f}, Avg Loss={avg_loss:.4f}")
+            
+            # --- LOGOWANIE DO TENSORBOARD ---
+            # Dodajemy skalary (wartości), które chcemy śledzić
+            writer.add_scalar('Training/Reward', total_reward, episode)
+            writer.add_scalar('Training/Average_Loss', avg_loss, episode)
+            writer.add_scalar('Training/Epsilon', epsilon, episode)
+            # --------------------------------
+            
             break
     #aktualizacja nauczyciela co jakis czas 
     if episode % config.TARGET_UPDATE == 0:
         nauczyciel.load_state_dict(uczen.state_dict())
+
+writer.close()
