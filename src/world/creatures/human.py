@@ -12,7 +12,8 @@ class Human(Creature):
     wood_inv: int = 0
     alive: bool = True
     actions_left: int = config.MAX_ACTIONS_PER_DAY
-    
+    death_cause: str = None
+
     def movement(self, action_id, world, creatures_list):
         if not self.alive or self.actions_left <= 0:
             return
@@ -93,8 +94,19 @@ class Human(Creature):
         self.hunger -= config.HUNGER_LOSS_PER_MOVE
         self.hunger = max(0, min(self.hunger, config.HUNGER_MAX))        
         
-        if self.temp <= config.TEMP_DIE or self.thirsty <= config.THIRSTY_DIE or self.hunger <= config.HUNGER_DIE:
+        if self.temp <= config.TEMP_DIE:
             self.alive = False
+            self.death_cause = "temperatura"
+            return
+        
+        if self.thirsty <= config.THIRSTY_DIE:
+            self.alive = False
+            self.death_cause = "picie"
+            return
+
+        if self.hunger <= config.HUNGER_DIE:
+            self.alive = False
+            self.death_cause = "jedzenie"
             return
         
     def colision(self, world, creature_list):
@@ -110,6 +122,7 @@ class Human(Creature):
                         self.hunger += config.COMBAT_WOLF_HUNGER_GAIN
                     else:
                         self.alive = False
+                        self.death_cause = 'wilczek'
                         return
                     
             if creature.x == self.x and creature.y == self.y:
@@ -120,6 +133,7 @@ class Human(Creature):
                         self.hunger += config.COMBAT_KNIGHT_HUNGER_GAIN
                     else:
                         self.alive = False
+                        self.death_cause = 'rycerz'
                         return        
                     
     def new_day(self):

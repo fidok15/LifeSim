@@ -1,6 +1,8 @@
 .DS_Store
 .vscode
 runs/
+saved parms/
+*.pth
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

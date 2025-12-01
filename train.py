@@ -30,6 +30,8 @@ memory = ReplayBuffer(config.MEMORY_SIZE)
 
 steps_done = 0
 
+death_history_indices = []
+
 def select_action(state, current_eps):
     if random.random() > current_eps:
         with torch.no_grad():
@@ -108,7 +110,7 @@ for episode in range(config.EPISODEDS):
         action = select_action(obs, epsilon)
         steps_done += 1
         #wykonanie kroku
-        next_obs, reward, terminated, truncated, _ = env.step(action)
+        next_obs, reward, terminated, truncated, info = env.step(action)
         #czy zdech
         done = terminated or truncated
         #zapisanie do memory
@@ -126,23 +128,37 @@ for episode in range(config.EPISODEDS):
             # Obliczamy średni loss dla epizodu
             avg_loss = sum(episode_losses) / len(episode_losses) if episode_losses else 0
             avg_q_val = sum(episode_qs) / len(episode_qs)
-            print(f"Epizod {episode+1}: Nagroda={total_reward:.2f}, Epsilon={epsilon:.2f}, Avg Loss={avg_loss:.4f}")
             
-            # --- LOGOWANIE DO TENSORBOARD ---
-            # Dodajemy skalary (wartości), które chcemy śledzić
+            cause_name = info.get('death_cause', 'Unknown')
+            
+            cause_idx = config.DEATH_MAP.get(cause_name, 5)             
+            death_history_indices.append(cause_idx)
+
+            print(f"Epizod {episode+1}: Nagroda={total_reward:.2f}, Epsilon={epsilon:.2f}, Avg Loss={avg_loss:.4f}, Avg Reward={avg_q_val}")
+
             writer.add_scalar('Training/Reward', total_reward, episode)
             writer.add_scalar('Training/Average_Loss', avg_loss, episode)
             writer.add_scalar('Training/Epsilon', epsilon, episode)
             writer.add_scalar('Training/Average_Q_Value', avg_q_val, episode)
-            # --------------------------------
             
             break
 
-    if episode % 50 == 0:
+    if episode % 200 == 0:
         torch.save(uczen.state_dict(), f"checkpoint_{episode}.pth")
         print(f"Zapisano model: checkpoint_{episode}.pth")
+    if episode % 300 == 0 and episode != 0:
+                death_tensor = torch.tensor(death_history_indices, dtype=torch.float32)
+                writer.add_histogram('Deaths/Histogram_Distribution', death_tensor, episode)
     #aktualizacja nauczyciela co jakis czas 
     if episode % config.TARGET_UPDATE == 0:
         nauczyciel.load_state_dict(uczen.state_dict())
+
+torch.save(uczen.state_dict(), f"last_saved.pth")
+torch.save({
+    'episode': config.EPISODEDS,
+    'model_state_dict': uczen.state_dict(),
+    'optimizer_state_dict': optimizer.state_dict(),
+}, f"final_checkpoint.pth")
+print("Model zapisany!")
 
 writer.close()

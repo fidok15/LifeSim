@@ -2,6 +2,7 @@ import gymnasium as gym
 import numpy as np
 from src import config as config
 from cycle import Cycle
+from collections import deque
 class SurvivalEnv(gym.Env):
     def __init__(self):
         super().__init__()
@@ -13,17 +14,22 @@ class SurvivalEnv(gym.Env):
             gym.spaces.Box(low=0, high=1, shape=(5,), dtype=np.float32)
         ))
         self.action_space = gym.spaces.Discrete(6)
+        self.recent_positions = deque(maxlen=20) 
+        self.steps_without_moving = 0
 
     def reset(self, seed = config.SEED):
         super().reset(seed=seed)
         if seed is not None:
             np.random.seed(seed)
         self.sim = Cycle()
+        self.recent_positions.clear()
+        self.steps_without_moving = 0
         return self._observation(), {}
     
     def step(self, action):
         prev_h = self.sim.human
-        prev_stats = {'hunger': prev_h.hunger, 'thirsty': prev_h.thirsty, 'temp': prev_h.temp, 'day_alive': prev_h.days_alive}
+        prev_stats = {'hunger': prev_h.hunger, 'thirsty': prev_h.thirsty, 'temp': prev_h.temp, 'wood_inv': prev_h.wood_inv}
+        prev_pos = (prev_h.x, prev_h.y)
         self.sim.step(action)
 
         curent_h = self.sim.human
@@ -31,24 +37,80 @@ class SurvivalEnv(gym.Env):
         terminated = not self.sim.human.alive
         truncated = False
 
+        info = {}
+
         reward = 0
         if terminated:
-            return obs, -10.0, terminated, truncated, {}
+            info['death_cause'] = getattr(curent_h, 'death_cause', 'unknown')
+            return obs, -50.0, terminated, truncated, info
         
         reward += 0.1
+        curr_pos = (curent_h.x, curent_h.y)
+        
+        is_safe_temp = curent_h.temp > config.TEMP_MAX * 0.4
+        is_safe_energy = curent_h.energy > config.ENERGY_MAX * 0.4
+
+        if curr_pos == prev_pos:
+            self.steps_without_moving += 1
+            if self.steps_without_moving > 3:
+                reward -= 1.0
+        else:
+            self.steps_without_moving = 0
+            if curr_pos not in self.recent_positions:
+                reward += 0.5 
+                self.recent_positions.append(curr_pos)
+
+        if curent_h.thirsty > prev_stats['thirsty']:
+            if prev_stats['thirsty'] < config.THIRSTY_MAX * 0.2:
+                reward += 5.0
+            else:
+                reward += 0.0
+        
+        if curent_h.hunger > prev_stats['hunger']:
+            if prev_stats['hunger'] < config.HUNGER_MAX * 0.2:
+                reward += 5.0
+            else:
+                reward += 0.0
+        
+        if curent_h.wood_inv > prev_stats['wood_inv']:
+            if prev_stats['wood_inv'] < 3:
+                reward += 2.0
+            else:
+                reward += 0.5
+
+        
+        if curent_h.wood_inv < prev_stats['wood_inv']:
+            x, y = curent_h.x, curent_h.y
+            if self.sim.world.terrain_grid[y, x] == config.ID_CAMPFIRE:
+                reward += 10.0
+                if not is_safe_temp:
+                    reward += 5.0
+        
+        if curent_h.temp > prev_stats['temp']:
+            if prev_stats['temp'] < config.TEMP_MAX * 0.5:
+                # Bardzo duża nagroda za ogrzewanie się, gdy jesteśmy zmarznięci
+                reward += 3.0
+            else:
+                reward += 0.5
+        
+        if curent_h.hunger < config.HUNGER_MAX * 0.2:
+            reward -= 0.5
+        
+        if curent_h.temp < config.TEMP_MAX * 0.2:
+            reward -= 1.0
 
         # if curent_h.days_alive > prev_stats['day_alive']:
         #     reward += 10 
 
-        if curent_h.hunger - prev_stats['hunger'] > 0 or curent_h.thirsty - prev_stats['thirsty'] > 0 or (curent_h.temp - prev_stats['temp'] > 0 and prev_stats['temp'] < (config.TEMP_DIE + config.TEMP_MAX) / 2 ):
-            reward += 5
+        # if curent_h.hunger - prev_stats['hunger'] > 0 or curent_h.thirsty - prev_stats['thirsty'] > 0 or (curent_h.temp - prev_stats['temp'] > 0 and prev_stats['temp'] < (config.TEMP_DIE + config.TEMP_MAX) / 2 ):
+        #     reward += 5
             
-        
+        # nie mozna go karac za bycie w zlym stanie bo dostaje depresi i chce sie zabic
         # if curent_h.hunger < 0.2 * config.HUNGER_MAX: reward -= 0.5
         # if curent_h.thirsty < 0.2 * config.THIRSTY_MAX: reward -= 0.5
         # if curent_h.temp < config.TEMP_DIE + (0.2 * (config.TEMP_MAX - config.TEMP_DIE)) : reward -= 0.5
 
-        return obs, reward, terminated, truncated, {}
+        return obs, reward, terminated, truncated, info
     
     def _observation(self):
         h = self.sim.human
