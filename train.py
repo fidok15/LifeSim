@@ -9,6 +9,7 @@ from src.model.model import DQNmodel
 from src.model.buffer import ReplayBuffer
 from src import config as config
 from torch.utils.tensorboard import SummaryWriter
+from collections import deque
 
 #naprawde istnieje takei cos jak mps 
 device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
@@ -31,6 +32,7 @@ memory = ReplayBuffer(config.MEMORY_SIZE)
 steps_done = 0
 
 death_history_indices = []
+last_50_rewards = deque(maxlen=50)
 
 def select_action(state, current_eps):
     if random.random() > current_eps:
@@ -74,7 +76,7 @@ def nauka_ucznia():
         # co nauczyciel uwaza MAX wartość z nast stanu 
         next_best_actions = uczen((next_state_grid, next_state_stats)).argmax(dim=1, keepdim=True)
         nauczyciel_predykcja = nauczyciel((next_state_grid, next_state_stats)).gather(1, next_best_actions).squeeze(1)
-        
+
         wzor_belmana = batch_reward + (config.GAMMA * nauczyciel_predykcja * (1 - batch_done))
     
     criterion = nn.SmoothL1Loss()
@@ -82,7 +84,7 @@ def nauka_ucznia():
     optimizer.zero_grad()
     loss.backward()
     #zabezpieczenie przed czyms
-    torch.nn.utils.clip_grad_value_(uczen.parameters(), 1)
+    torch.nn.utils.clip_grad_norm_(uczen.parameters(), max_norm=1)
     optimizer.step()
     
     return loss.item(), avg_q
@@ -106,6 +108,7 @@ for episode in range(config.EPISODEDS):
     episode_losses = []
     episode_qs = []
     epsilon = config.EPS_END + (config.EPS_START - config.EPS_END) * math.exp(-1. * steps_done / config.EPS_DECAY)
+    episode_steps = 0
 
     while True:
         action = select_action(obs, epsilon)
@@ -117,7 +120,8 @@ for episode in range(config.EPISODEDS):
         #zapisanie do memory
         memory.push(obs, action, reward, next_obs, done)
         result = nauka_ucznia()
-        
+        episode_steps += 1
+
         if result is not None:
             loss_value, q_val = result
             episode_losses.append(loss_value)
@@ -130,21 +134,25 @@ for episode in range(config.EPISODEDS):
             avg_loss = sum(episode_losses) / len(episode_losses) if episode_losses else 0
             avg_q_val = sum(episode_qs) / len(episode_qs)
             
+            last_50_rewards.append(total_reward)
+            avg_reward_50 = sum(last_50_rewards) / len(last_50_rewards)
             cause_name = info.get('death_cause', 'Unknown')
             
             cause_idx = config.DEATH_MAP.get(cause_name, 5)             
             death_history_indices.append(cause_idx)
 
-            print(f"Epizod {episode+1}: Nagroda={total_reward:.2f}, Epsilon={epsilon:.2f}, Avg Loss={avg_loss:.4f}, Avg Reward={avg_q_val}")
-
+            print(f"Epizod {episode+1}: Nagroda={total_reward:.2f}, Kroki={episode_steps}, Avg50={avg_reward_50:.2f}, Epsilon={epsilon:.2f}, Avg Loss={avg_loss:.4f}, Avg Reward={avg_q_val}")
+            writer.add_scalar('Training/Num_Steps', episode_steps, episode)
+            writer.add_scalar('Training/Average_Reward_50', avg_reward_50, episode)
             writer.add_scalar('Training/Reward', total_reward, episode)
             writer.add_scalar('Training/Average_Loss', avg_loss, episode)
             writer.add_scalar('Training/Epsilon', epsilon, episode)
+            # jaka mogla byc najwieksza nagroda 
             writer.add_scalar('Training/Average_Q_Value', avg_q_val, episode)
             
             break
 
-    if episode % 200 == 0:
+    if episode % 100 == 0:
         torch.save(uczen.state_dict(), f"checkpoint_{episode}.pth")
         print(f"Zapisano model: checkpoint_{episode}.pth")
     if episode % 300 == 0 and episode != 0:

@@ -28,10 +28,14 @@ class World:
             return 0 
         
         if self.wood_grid[y, x] <= 0:
+            self.terrain_grid[y, x] = config.ID_PLAIN
             return 0
 
         self.wood_grid[y, x] -= 1
+        if self.wood_grid[y, x] <= 0:
+             self.terrain_grid[y, x] = config.ID_PLAIN
         return 1
+    
     
     def add_fuel(self, x, y):
         if self.terrain_grid[y, x] != config.ID_CAMPFIRE:

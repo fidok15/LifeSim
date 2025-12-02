@@ -58,7 +58,7 @@ class Human(Creature):
                     self.wood_inv -= 1                  
 
         elif tile == config.ID_WATER:
-            self.thirsty = min(self.thirsty + 10, config.THIRSTY_MAX)
+            self.thirsty = min(self.thirsty + config.THIRSTY_GAIN, config.THIRSTY_MAX)
             
         for creature in creatures_list:
             if creature is self or not creature.alive:
