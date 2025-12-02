@@ -72,8 +72,9 @@ def nauka_ucznia():
 
     with torch.no_grad():
         # co nauczyciel uwaza MAX wartość z nast stanu 
-        nauczyciel_predykcja = nauczyciel((next_state_grid, next_state_stats)).max(1)[0]
-
+        next_best_actions = uczen((next_state_grid, next_state_stats)).argmax(dim=1, keepdim=True)
+        nauczyciel_predykcja = nauczyciel((next_state_grid, next_state_stats)).gather(1, next_best_actions).squeeze(1)
+        
         wzor_belmana = batch_reward + (config.GAMMA * nauczyciel_predykcja * (1 - batch_done))
     
     criterion = nn.SmoothL1Loss()

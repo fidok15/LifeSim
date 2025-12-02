@@ -138,10 +138,13 @@ class SurvivalEnv(gym.Env):
                             view[4, i, j] = 1.0
                 else:
                     pass
+
+        temp_normalized = (h.temp - config.TEMP_DIE) / (config.TEMP_MAX - config.TEMP_DIE)
+        temp_normalized = np.clip(temp_normalized, 0.0, 1.0)
         stats = np.array([
             h.hunger / config.HUNGER_MAX,
             h.thirsty / config.THIRSTY_MAX,
-            h.temp / config.TEMP_MAX,
+            temp_normalized,
             h.energy / config.ENERGY_MAX,
             h.wood_inv / config.MAX_WOOD_INV
         ], dtype=np.float32)
