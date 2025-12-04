@@ -13,6 +13,7 @@ class Human(Creature):
     alive: bool = True
     actions_left: int = config.MAX_ACTIONS_PER_DAY
     death_cause: str = None
+    points: str = 0
 
     def movement(self, action_id, world, creatures_list):
         if not self.alive or self.actions_left <= 0:
@@ -37,6 +38,7 @@ class Human(Creature):
         self.colision(world, creatures_list)
         self.update_stats(world)
         self.actions_left -= 1
+        self.points += config.POINTS_PER_MOVE
         
 
     def interact_with_environment(self, world, creatures_list):
@@ -120,6 +122,7 @@ class Human(Creature):
                         creature.alive = False
                         self.energy += config.COMBAT_WOLF_ENERGY_GAIN
                         self.hunger += config.COMBAT_WOLF_HUNGER_GAIN
+                        self.points += config.COMBAT_WOLF_POINTS_GAIN
                     else:
                         self.alive = False
                         self.death_cause = 'wilczek'
@@ -131,6 +134,7 @@ class Human(Creature):
                         creature.alive = False
                         self.energy += config.COMBAT_KNIGHT_ENERGY_GAIN
                         self.hunger += config.COMBAT_KNIGHT_HUNGER_GAIN
+                        self.points += config.COMBAT_KNIGHT_POINTS_GAIN
                     else:
                         self.alive = False
                         self.death_cause = 'rycerz'

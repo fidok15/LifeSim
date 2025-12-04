@@ -101,6 +101,7 @@ def print_map(sim):
     print(f"Dzień: {h.days_alive} | Akcje: {h.actions_left}/{config.MAX_ACTIONS_PER_DAY}")
     print(f"Zdrowie (Alive): {h.alive} | Energia: {h.energy:.1f} | Głód: {h.hunger:.1f} | Pragnienie: {h.thirsty:.1f}")
     print(f"Temp: {h.temp:.1f}°C | Drewno: {h.wood_inv}")
+    print(f"Punkty: {h.points:.1f}")
     print("-" * (sim.world.size + 2))
 
     # Prosty renderer wycinka mapy (żeby nie spamować całej konsoli przy dużej mapie)
