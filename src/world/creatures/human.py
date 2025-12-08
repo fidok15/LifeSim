@@ -8,12 +8,12 @@ class Human(Creature):
     thirsty: float = config.THIRSTY_MAX
     temp: float = config.TEMP_MAX
     energy: float = config.ENERGY_MAX
-    days_alive: int = 0
+    moves_alive: int = 0
     wood_inv: int = 0
     alive: bool = True
     actions_left: int = config.MAX_ACTIONS_PER_DAY
     death_cause: str = None
-    points: str = 0
+    points: float = 0
 
     def movement(self, action_id, world, creatures_list):
         if not self.alive or self.actions_left <= 0:
@@ -38,6 +38,7 @@ class Human(Creature):
         self.colision(world, creatures_list)
         self.update_stats(world)
         self.actions_left -= 1
+        self.moves_alive += 1
         self.points += config.POINTS_PER_MOVE
         
 

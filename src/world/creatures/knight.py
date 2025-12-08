@@ -8,7 +8,7 @@ class Knight(Creature):
     energy: float = config.KNIGHT_START_ENERGY
     alive: bool = True
 
-    def wolf_move(self, world):
+    def knight_move(self, world):
         if not self.alive: return
         dx = random.randint(-1, 1)
         dy = random.randint(-1, 1)
